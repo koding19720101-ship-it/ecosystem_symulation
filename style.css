@@ -1,0 +1,92 @@
+:root {
+    --bg-color: #0d0d12;
+    --panel-bg: rgba(20, 20, 30, 0.7);
+    --accent-color: #6366f1;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --herbivore-color: #34d399;
+    --carnivore-color: #fb7185;
+    --plant-color: #4ade80;
+    --font-outfit: 'Outfit', sans-serif;
+    --log-birth: #34d399;
+    --log-death: #f43f5e;
+    --log-extinction: #fbbf24;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-outfit); }
+body { background-color: var(--bg-color); color: var(--text-primary); width: 100vw; height: 100vh; overflow: hidden; user-select: none; }
+canvas { display: block; width: 100%; height: 100%; }
+
+/* UI Panel (Left) */
+#uiPanel {
+    position: absolute; top: 20px; left: 20px; padding: 24px;
+    background: var(--panel-bg); backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border); border-radius: 20px;
+    min-width: 280px; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    pointer-events: auto; z-index: 50;
+}
+#title { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; background: linear-gradient(135deg, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+#timeInfo, #worldStats { display: flex; gap: 12px; font-size: 0.9rem; color: var(--text-secondary); margin-top: 4px; }
+.entity-counts { display: flex; flex-direction: column; gap: 10px; padding-top: 18px; margin-top: 18px; border-top: 1px solid var(--glass-border); }
+.stat { font-weight: 600; font-size: 1.1rem; display: flex; justify-content: space-between; }
+#herbivoreCount { color: var(--herbivore-color); }
+#carnivoreCount { color: var(--carnivore-color); }
+#plantCount { color: var(--plant-color); }
+.controls-hint { margin-top: 20px; font-size: 0.75rem; color: var(--text-secondary); opacity: 0.7; line-height: 1.5; }
+
+/* Log Panel (Right) */
+#logPanel {
+    position: absolute; top: 20px; right: 20px; width: 300px; max-height: 60vh;
+    background: var(--panel-bg); backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border); border-radius: 20px;
+    display: flex; flex-direction: column; overflow: hidden;
+    box-shadow: -10px 15px 40px rgba(0, 0, 0, 0.6); z-index: 50;
+}
+.log-header { padding: 16px; font-weight: 700; font-size: 1rem; border-bottom: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); }
+#eventLog { padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; scroll-behavior: smooth; }
+.log-entry { padding: 6px 10px; border-radius: 8px; background: rgba(255,255,255,0.03); line-height: 1.4; border-left: 3px solid transparent; }
+.log-birth { border-left-color: var(--log-birth); color: #e2e8f0; }
+.log-death { border-left-color: var(--log-death); color: #e2e8f0; }
+.log-extinction { border-left-color: var(--log-extinction); background: rgba(251, 191, 36, 0.1); color: #fbbf24; font-weight: 600; }
+
+/* Tooltip */
+#entityTooltip { position: fixed; pointer-events: none; background: rgba(10, 10, 15, 0.96); backdrop-filter: blur(12px); border: 1px solid var(--accent-color); border-radius: 12px; padding: 12px; min-width: 240px; z-index: 200; box-shadow: 0 10px 30px rgba(0,0,0,0.8); transition: opacity 0.2s; }
+.tooltip-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 0px; color: #fff; }
+.tooltip-sci { font-size: 0.7rem; color: var(--accent-color); font-style: italic; margin-bottom: 8px; border-bottom: 1px solid var(--glass-border); padding-bottom: 4px; }
+.tooltip-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; font-size: 0.7rem; }
+.tooltip-stat { display: flex; flex-direction: row; justify-content: space-between; gap: 4px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 2px; }
+.tooltip-stat label { font-size: 0.65rem; color: var(--text-secondary); text-transform: none; letter-spacing: 0; }
+.tooltip-stat span { color: var(--text-primary); font-weight: 500; font-size: 0.7rem; }
+.tooltip-section { grid-column: 1 / -1; margin-top: 6px; padding-top: 4px; border-top: 1px solid var(--glass-border); font-size: 0.65rem; color: var(--accent-color); font-weight: 700; opacity: 0.8; }
+
+/* Bio-Neural Visualization */
+.neuron-grid { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.neuron-row { display: flex; align-items: center; gap: 10px; }
+.neuron-action-label { width: 45px; font-size: 0.6rem; color: var(--text-secondary); font-weight: 700; }
+.neuron-inputs { display: flex; gap: 8px; }
+.neuron-hollow { width: 14px; height: 14px; border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; }
+.neuron-pulse { border-radius: 50%; width: 0%; height: 0%; transition: width 0.3s, height 0.3s; }
+.neuron-pulse.pos { background: radial-gradient(circle, #34d399, #10b981); box-shadow: 0 0 8px #34d399; }
+.neuron-pulse.neg { background: radial-gradient(circle, #f43f5e, #e11d48); box-shadow: 0 0 8px #f43f5e; }
+
+@keyframes vibrate {
+    0% { transform: translate(0,0) scale(1); }
+    25% { transform: translate(-1px, 1px) scale(1.05); }
+    50% { transform: translate(1px, -1px) scale(0.95); }
+    75% { transform: translate(-1px, -1px) scale(1.05); }
+    100% { transform: translate(0,0) scale(1); }
+}
+.vibrate-active { animation: vibrate 0.1s infinite linear; }
+.w-active-row { background: rgba(99, 102, 241, 0.15); border-radius: 4px; padding: 2px 0; }
+
+/* Chat */
+#chatOverlay { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 450px; max-width: 90vw; background: var(--panel-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 16px; padding: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); z-index: 100; }
+#chatHistory { max-height: 150px; overflow-y: auto; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 12px; }
+#chatInput { width: 100%; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--glass-border); border-radius: 8px; padding: 10px 14px; color: var(--text-primary); outline: none; }
+#chatInput:focus { border-color: var(--accent-color); }
+
+.hidden { display: none !important; }
+#effectOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; pointer-events: none; z-index: 1000; }
+@keyframes flash { 0% { opacity: 1; } 100% { opacity: 0; } }
+.flash-active { animation: flash 2s cubic-bezier(0.1, 0, 0.2, 1) forwards; }

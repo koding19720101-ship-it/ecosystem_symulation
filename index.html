@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>생태계 시뮬레이션 | Ecosystem Simulation</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <canvas id="simCanvas"></canvas>
+    <div id="effectOverlay"></div>
+
+    <!-- Main UI Panel (Left) -->
+    <div id="uiPanel">
+        <div class="stat-group">
+            <h1 id="title">생태계 시뮬레이션</h1>
+            <div id="timeInfo">
+                <span id="season">봄</span>
+                <span id="month">1개월</span>
+                <span id="year">1년차</span>
+            </div>
+            <div id="worldStats">
+                <span id="temp">온도: 20°C</span>
+                <span id="weather">맑음</span>
+            </div>
+            <div id="realTimeInfo" style="font-size: 0.7rem; margin-top: 8px; color: var(--text-secondary); opacity: 0.6;">
+                <div id="simStarted">시작: -</div>
+                <div id="simElapsed">경과: -</div>
+                <div id="simDate" style="color: #60a5fa; font-weight: 600; margin-top: 4px;">가상 날짜: -</div>
+            </div>
+            <div id="topScorerArea" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--glass-border); cursor: pointer; transition: all 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1.0'">
+                <div style="font-size: 0.65rem; color: #34d399; font-weight: 700; display: flex; align-items: center; gap: 4px;">
+                    <span style="font-size: 10px;">🏆</span> 최고 득점자 (MVP)
+                </div>
+                <div id="topScorerName" style="font-size: 0.85rem; font-weight: 600; color: #fff;">-</div>
+            </div>
+            <div id="bottomScorerArea" style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: all 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1.0'">
+                <div style="font-size: 0.65rem; color: #fb7185; font-weight: 700; display: flex; align-items: center; gap: 4px;">
+                    <span style="font-size: 10px;">💀</span> 최저 득점자 (Danger)
+                </div>
+                <div id="bottomScorerName" style="font-size: 0.85rem; font-weight: 600; color: #fff;">-</div>
+            </div>
+            <div style="font-size: 0.55rem; color: var(--text-secondary); margin-top: 4px; opacity: 0.5;">이름을 클릭하면 해당 개체를 추적합니다.</div>
+        </div>
+
+        <div class="entity-counts">
+            <div class="stat">초식: <span id="herbivoreCount">0</span></div>
+            <div class="stat">육식: <span id="carnivoreCount">0</span></div>
+            <div class="stat">식물: <span id="plantCount">0</span></div>
+        </div>
+
+        <div class="controls-hint">
+            <p>WASD: 화면 이동 | Scroll: 확대/축소</p>
+            <p>1~0: 개체 슬롯 할당 (Hover중 사용)</p>
+            <p>Ctrl+1~0: 지정 개체 점프</p>
+            <p>/: 명령어 입력</p>
+        </div>
+    </div>
+
+    <!-- Event Log Panel (Right) -->
+    <div id="logPanel">
+        <div class="log-header">활동 로그</div>
+        <div id="eventLog">
+            <!-- Events will appear here -->
+        </div>
+    </div>
+
+    <!-- Entity Tooltip -->
+    <div id="entityTooltip" class="hidden">
+        <div id="tooltipName" class="tooltip-name">Common Name</div>
+        <div id="tooltipSci" class="tooltip-sci">Scientific Name</div>
+        <div id="tooltipStats" class="tooltip-stats">
+            <!-- Stats populated by game.js -->
+        </div>
+    </div>
+
+    <!-- Chat Overlay -->
+    <div id="chatOverlay" class="hidden">
+        <div id="chatHistory"></div>
+        <input type="text" id="chatInput" placeholder="명령어를 입력하세요... (/meteo)">
+    </div>
+
+    <script src="src/game.js"></script>
+</body>
+</html>
