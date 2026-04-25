@@ -80,7 +80,47 @@
     <!-- Chat Overlay -->
     <div id="chatOverlay" class="hidden">
         <div id="chatHistory"></div>
-        <input type="text" id="chatInput" placeholder="명령어를 입력하세요... (/meteo)">
+        <input type="text" id="chatInput" placeholder="명령어를 입력하세요... (/meteo, /summon, /feed, /resurrection, /punish)">
+    </div>
+
+    <!-- Summon UI Modal -->
+    <div id="summonModal" class="hidden">
+        <div class="modal-content">
+            <h2>개체 소환 (Summon)</h2>
+            <div class="input-group">
+                <label>이름</label>
+                <input type="text" id="summonName" placeholder="개체의 이름을 정해주세요">
+            </div>
+            <div class="input-group">
+                <label>종류</label>
+                <select id="summonType">
+                    <option value="Herbivore">초식 동물</option>
+                    <option value="Carnivore">육식 동물</option>
+                </select>
+            </div>
+            <div class="stats-grid">
+                <div class="input-group">
+                    <label>크기</label>
+                    <input type="range" id="summonSize" min="1" max="10" step="0.5" value="5">
+                </div>
+                <div class="input-group">
+                    <label>속도</label>
+                    <input type="range" id="summonSpeed" min="1" max="10" step="0.5" value="3">
+                </div>
+                <div class="input-group">
+                    <label>공격력</label>
+                    <input type="range" id="summonAttack" min="10" max="100" value="30">
+                </div>
+                <div class="input-group">
+                    <label>수명 (초)</label>
+                    <input type="range" id="summonMaxL" min="60" max="3600" step="60" value="600">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="cancelSummon">취소</button>
+                <button id="confirmSummon" class="primary">생성하기</button>
+            </div>
+        </div>
     </div>
 
     <script src="src/game.js"></script>

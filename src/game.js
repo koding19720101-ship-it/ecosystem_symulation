@@ -278,15 +278,19 @@ class Simulation {
             this.entities = []; this.hovered = null; this.keys = {}; this.slots = new Array(10).fill(null); this.lightnings = [];
             this.ws = 1400; this.followTarget = null; this.visionMode = false; this.namingMode = false;
             
-            this.world.onLightning = () => { 
-                const lx = (Math.random()-0.5)*this.ws, ly = (Math.random()-0.5)*this.ws; this.lightnings.push(new Lightning(lx, ly));
-                this.entities.forEach(e => { if (!e.isDead && Math.sqrt((e.x-lx)**2+(e.y-ly)**2) < 45) { e.die("벼락"); e.fireT = 6000; } });
+            this.world.onLightning = (lx, ly) => { 
+                const targetX = lx !== undefined ? lx : (Math.random()-0.5)*this.ws;
+                const targetY = ly !== undefined ? ly : (Math.random()-0.5)*this.ws;
+                this.lightnings.push(new Lightning(targetX, targetY));
+                this.entities.forEach(e => { if (!e.isDead && Math.sqrt((e.x-targetX)**2+(e.y-targetY)**2) < 45) { e.die("벼락"); e.fireT = 6000; } });
             };
             this.world.onYear = () => this.entities.forEach(e => { if (e.maxAge !== undefined && !e.isDead) e.grow(); });
             
             this.currentBG = { r: 61, g: 43, b: 31 };
             this.lastTooltipUpdateTime = 0;
+            this.clickMode = null;
             this.setup(); this.load(); if (this.entities.length === 0) this.init();
+            this.initSummonUI();
             this.logger.add("시뮬레이션 엔진 가동 시작!", 'birth');
             setInterval(() => this.save(), 5000); requestAnimationFrame((t) => this.loop(t));
         } catch(err) { console.error("Constructor error:", err); }
@@ -307,7 +311,10 @@ class Simulation {
         window.addEventListener('mousemove', (e) => { this.mx = e.clientX; this.my = e.clientY; });
         this.canvas.addEventListener('mousedown', (e) => {
             if (e.button === 0) {
-                if (this.namingMode && this.hovered) {
+                const wp = this.camera.toWorld(e.clientX, e.clientY);
+                if (this.clickMode) {
+                    this.handleCommandClick(wp);
+                } else if (this.namingMode && this.hovered) {
                     const n = prompt("새 이름:", this.hovered.customName || ""); if (n) this.hovered.customName = n.trim(); this.namingMode = false;
                 } else if (this.hovered) this.followTarget = this.hovered;
             }
@@ -581,6 +588,74 @@ class Simulation {
         const mag = Math.sqrt(a.vx*a.vx + a.vy*a.vy);
         if (mag > 0) { a.vx /= mag; a.vy /= mag; }
     }
+    handleCommandClick(wp) {
+        const r = 30 / this.camera.zoom;
+        const target = this.entities.find(e => Math.abs(e.x - wp.x) < r && Math.abs(e.y - wp.y) < r);
+        
+        if (this.clickMode === 'feed' && target && target instanceof Animal && !target.isDead) {
+            target.hunger = 100;
+            target.hp = Math.min(100, target.hp + 20);
+            this.logger.add(`[명령어] ${target.customName || NamingEngine.toString(target.sciName)}의 배고픔을 채웠습니다.`, 'birth');
+            this.clickMode = null;
+        } else if (this.clickMode === 'resurrect' && target && target.isCorpse) {
+            target.isDead = false;
+            target.isCorpse = false;
+            target.hp = 100;
+            if (target instanceof Animal) target.hunger = 100;
+            this.logger.add(`[명령어] ${target.customName || NamingEngine.toString(target.sciName)}을(를) 부활시켰습니다!`, 'birth');
+            this.clickMode = null;
+        } else if (this.clickMode === 'punish') {
+            this.world.onLightning(wp.x, wp.y);
+            this.logger.add(`[명령어] 지정된 위치에 번개를 떨어뜨렸습니다.`, 'death');
+            this.clickMode = null;
+        }
+    }
+
+    initSummonUI() {
+        const modal = document.getElementById('summonModal');
+        const confirmBtn = document.getElementById('confirmSummon');
+        const cancelBtn = document.getElementById('cancelSummon');
+
+        if (!modal || !confirmBtn || !cancelBtn) return;
+
+        confirmBtn.onclick = () => {
+            const name = document.getElementById('summonName').value;
+            const type = document.getElementById('summonType').value;
+            const size = parseFloat(document.getElementById('summonSize').value);
+            const speed = parseFloat(document.getElementById('summonSpeed').value);
+            const attack = parseFloat(document.getElementById('summonAttack').value);
+            const maxL = parseFloat(document.getElementById('summonMaxL').value);
+
+            const wp = this.camera.toWorld(this.canvas.width / 2, this.canvas.height / 2);
+            
+            const genes = { 
+                size: size, 
+                maxL: maxL, 
+                speed: speed, 
+                metabolism: 1.4, 
+                attack: attack, 
+                insulation: 0, 
+                vertices: GeneticEngine.generateRandomShape(5), 
+                color: type === 'Herbivore' ? {r:74,g:222,b:128} : {r:251,g:113,b:133}, 
+                gender: Math.random() > 0.5 ? 'M' : 'F' 
+            };
+            
+            const a = new Animal(wp.x, wp.y, genes, type);
+            if (name) a.customName = name;
+            this.entities.push(a);
+            
+            this.logger.add(`[소환] ${name || NamingEngine.toString(a.sciName)}이(가) 소환되었습니다!`, 'birth');
+            modal.classList.add('hidden');
+        };
+
+        cancelBtn.onclick = () => modal.classList.add('hidden');
+    }
+
+    showSummonModal() {
+        const modal = document.getElementById('summonModal');
+        if (modal) modal.classList.remove('hidden');
+    }
+
     repr(a, b) { 
         const mut = () => (Math.random() * 0.2 - 0.1); // 10% 변이
         const g = { 
@@ -736,6 +811,14 @@ window.addEventListener('load', () => {
                     setTimeout(() => { sim.reset(); ov?.classList.remove('flash-active'); }, 1000); 
                 } else if (v === '/named') { 
                     sim.namingMode = true; sim.logger.add("이름 모드 활성: 개체를 클릭하세요.", 'birth'); 
+                } else if (v === '/feed') {
+                    sim.clickMode = 'feed'; sim.logger.add("피딩 모드 활성: 배고픈 개체를 클릭하세요.", 'birth');
+                } else if (v === '/resurrection') {
+                    sim.clickMode = 'resurrect'; sim.logger.add("부활 모드 활성: 사체를 클릭하세요.", 'birth');
+                } else if (v === '/punish') {
+                    sim.clickMode = 'punish'; sim.logger.add("징벌 모드 활성: 번개를 내릴 위치를 클릭하세요.", 'death');
+                } else if (v === '/summon') {
+                    sim.showSummonModal();
                 } else if (v.startsWith('/tp ')) { 
                     const n = v.substring(4).trim(), t = sim.entities.find(e => e.customName?.toLowerCase() === n.toLowerCase()); 
                     if(t){ sim.camera.x = t.x; sim.camera.y = t.y; sim.logger.add(`${n}에게 이동함`, 'birth'); } 
