@@ -628,9 +628,18 @@ class Simulation {
             updatePreview();
         }
 
+        const typeSelect = document.getElementById('summonType');
+        if (typeSelect && colorInput) {
+            typeSelect.addEventListener('change', () => {
+                if (typeSelect.value === 'Herbivore') colorInput.value = '#4ade80';
+                else colorInput.value = '#fb7185';
+                if (colorPreview) colorPreview.style.backgroundColor = colorInput.value;
+            });
+        }
+
         confirmBtn.onclick = () => {
             const name = document.getElementById('summonName').value;
-            const type = document.getElementById('summonType').value;
+            const type = typeSelect ? typeSelect.value : 'Herbivore';
             const size = parseFloat(document.getElementById('summonSize').value);
             const speed = parseFloat(document.getElementById('summonSpeed').value);
             const attack = parseFloat(document.getElementById('summonAttack').value);
