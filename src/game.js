@@ -169,7 +169,7 @@ class BaseEntity {
             const angle = (isAnimal && !this.isCorpse) ? Math.atan2(this.vy, this.vx) : 0;
             
             if (visionMode && isAnimal && !this.isDead) {
-                const range = this.type === 'Herbivore' ? 300 : 400;
+                const range = this.genes.visionRange || (this.type === 'Herbivore' ? 300 : 400);
                 ctx.save(); ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.arc(this.x, this.y, range, angle - Math.PI/3, angle + Math.PI/3); ctx.lineTo(this.x, this.y);
                 ctx.fillStyle = this.type === 'Herbivore' ? 'rgba(96, 165, 250, 0.1)' : 'rgba(248, 113, 113, 0.1)'; ctx.fill(); ctx.restore();
             }
@@ -394,9 +394,10 @@ class Simulation {
                 const labels = ['회피','포식','번식','배회','휴식','공격','위협','숨기'];
                 const animals = this.entities.filter(en => !en.isDead && en.type);
                 
-                const pred = animals.find(p => p.type === 'Carnivore' && this.inFOV(this.hovered, p, 300));
-                const prey = this.getN(this.hovered, this.entities.filter(en => !en.isDead && (en.maxAge !== undefined || en.type)), 300);
-                const mate = animals.find(m => m.type === this.hovered.type && m !== this.hovered && this.inFOV(this.hovered, m, 400));
+                const vRange = this.hovered.genes.visionRange || (this.hovered.type === 'Herbivore' ? 300 : 400);
+                const pred = animals.find(p => p.type === 'Carnivore' && this.inFOV(this.hovered, p, vRange));
+                const prey = this.getN(this.hovered, this.entities.filter(en => !en.isDead && (en.maxAge !== undefined || en.type)), vRange);
+                const mate = animals.find(m => m.type === this.hovered.type && m !== this.hovered && this.inFOV(this.hovered, m, vRange * 1.3));
                 
                 const b = this.ws/2, edge = Math.min(b-Math.abs(this.hovered.x), b-Math.abs(this.hovered.y))/b;
                 const density = animals.filter(ot => ot !== this.hovered && this.gD(this.hovered, ot) < 150).length / 10;
@@ -485,12 +486,13 @@ class Simulation {
             this.spawnAnimal('Carnivore', null, gender);
         }
         ants.forEach(a => {
-            const pred = a.type==='Herbivore' ? ants.find(p=>p.type==='Carnivore'&&this.inFOV(a,p,300)) : null;
-            const prey = a.type==='Herbivore' ? this.getN(a,pts,300) : this.getN(a,[...ants.filter(h=>h.type==='Herbivore'), ...corpses],400);
+            const vRange = a.genes.visionRange || (a.type === 'Herbivore' ? 300 : 400);
+            const pred = a.type==='Herbivore' ? ants.find(p=>p.type==='Carnivore'&&this.inFOV(a,p,vRange)) : null;
+            const prey = a.type==='Herbivore' ? this.getN(a,pts,vRange) : this.getN(a,[...ants.filter(h=>h.type==='Herbivore'), ...corpses], vRange * 1.3);
             
             // 시야 내 적절한 짝 찾기 (성별 다름, 같은 종, 성숙함)
             const matesInFOV = ants.filter(m => m.type === a.type && m !== a && m.age > 48 && m.genes.gender !== a.genes.gender);
-            const mate = this.getN(a, matesInFOV, 400);
+            const mate = this.getN(a, matesInFOV, vRange * 1.3);
 
             const bLimit = this.ws/2;
             const distEdge = Math.min(bLimit - Math.abs(a.x), bLimit - Math.abs(a.y)) / bLimit;
@@ -627,6 +629,9 @@ class Simulation {
             const maxL = parseFloat(document.getElementById('summonMaxL').value);
             const metabolism = parseFloat(document.getElementById('summonMetabolism').value);
             const insulation = parseFloat(document.getElementById('summonInsulation').value);
+            const vision = parseFloat(document.getElementById('summonVision').value);
+            const hp = parseFloat(document.getElementById('summonHp').value);
+            const hunger = parseFloat(document.getElementById('summonHunger').value);
             const gender = document.getElementById('summonGender').value;
             const r = parseInt(document.getElementById('summonR').value);
             const g = parseInt(document.getElementById('summonG').value);
@@ -641,6 +646,7 @@ class Simulation {
                 metabolism: metabolism, 
                 attack: attack, 
                 insulation: insulation, 
+                visionRange: vision,
                 vertices: GeneticEngine.generateRandomShape(5), 
                 color: { r, g, b }, 
                 gender: gender 
@@ -648,6 +654,8 @@ class Simulation {
             
             const a = new Animal(wp.x, wp.y, genes, type);
             if (name) a.customName = name;
+            a.hp = hp;
+            a.hunger = hunger;
             this.entities.push(a);
             
             this.logger.add(`[소환] ${name || NamingEngine.toString(a.sciName)}이(가) 소환되었습니다!`, 'birth');
