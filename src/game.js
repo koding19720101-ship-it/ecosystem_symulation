@@ -625,6 +625,12 @@ class Simulation {
             const speed = parseFloat(document.getElementById('summonSpeed').value);
             const attack = parseFloat(document.getElementById('summonAttack').value);
             const maxL = parseFloat(document.getElementById('summonMaxL').value);
+            const metabolism = parseFloat(document.getElementById('summonMetabolism').value);
+            const insulation = parseFloat(document.getElementById('summonInsulation').value);
+            const gender = document.getElementById('summonGender').value;
+            const r = parseInt(document.getElementById('summonR').value);
+            const g = parseInt(document.getElementById('summonG').value);
+            const b = parseInt(document.getElementById('summonB').value);
 
             const wp = this.camera.toWorld(this.canvas.width / 2, this.canvas.height / 2);
             
@@ -632,12 +638,12 @@ class Simulation {
                 size: size, 
                 maxL: maxL, 
                 speed: speed, 
-                metabolism: 1.4, 
+                metabolism: metabolism, 
                 attack: attack, 
-                insulation: 0, 
+                insulation: insulation, 
                 vertices: GeneticEngine.generateRandomShape(5), 
-                color: type === 'Herbivore' ? {r:74,g:222,b:128} : {r:251,g:113,b:133}, 
-                gender: Math.random() > 0.5 ? 'M' : 'F' 
+                color: { r, g, b }, 
+                gender: gender 
             };
             
             const a = new Animal(wp.x, wp.y, genes, type);
