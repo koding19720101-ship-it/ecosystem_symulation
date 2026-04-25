@@ -98,57 +98,57 @@
                     <option value="Carnivore">육식 동물</option>
                 </select>
             </div>
-            <div class="stats-grid">
+            <div class="stats-grid compact">
                 <div class="input-group">
                     <label>크기</label>
-                    <input type="range" id="summonSize" min="1" max="10" step="0.5" value="5">
+                    <input type="number" id="summonSize" value="5" step="0.1">
                 </div>
                 <div class="input-group">
                     <label>속도</label>
-                    <input type="range" id="summonSpeed" min="1" max="10" step="0.5" value="3">
+                    <input type="number" id="summonSpeed" value="3" step="0.1">
                 </div>
                 <div class="input-group">
                     <label>공격력</label>
-                    <input type="range" id="summonAttack" min="10" max="100" value="30">
+                    <input type="number" id="summonAttack" value="30">
                 </div>
                 <div class="input-group">
                     <label>수명 (초)</label>
-                    <input type="range" id="summonMaxL" min="60" max="3600" step="60" value="600">
+                    <input type="number" id="summonMaxL" value="600">
                 </div>
                 <div class="input-group">
                     <label>신진대사</label>
-                    <input type="range" id="summonMetabolism" min="0.5" max="3" step="0.1" value="1.4">
+                    <input type="number" id="summonMetabolism" value="1.4" step="0.1">
                 </div>
                 <div class="input-group">
                     <label>온도 적응</label>
-                    <input type="range" id="summonInsulation" min="-20" max="20" step="1" value="0">
+                    <input type="number" id="summonInsulation" value="0">
                 </div>
                 <div class="input-group">
                     <label>시야 범위</label>
-                    <input type="range" id="summonVision" min="100" max="1000" step="50" value="350">
+                    <input type="number" id="summonVision" value="350">
                 </div>
                 <div class="input-group">
-                    <label>초기 체력 (HP)</label>
-                    <input type="range" id="summonHp" min="10" max="100" step="5" value="100">
+                    <label>초기 HP</label>
+                    <input type="number" id="summonHp" value="100">
                 </div>
                 <div class="input-group">
                     <label>초기 허기</label>
-                    <input type="range" id="summonHunger" min="10" max="100" step="5" value="100">
+                    <input type="number" id="summonHunger" value="100">
                 </div>
                 <div class="input-group">
                     <label>성별</label>
                     <select id="summonGender">
-                        <option value="M">수컷 (♂)</option>
-                        <option value="F">암컷 (♀)</option>
+                        <option value="M">♂ 수컷</option>
+                        <option value="F">♀ 암컷</option>
                     </select>
                 </div>
-                <div class="input-group">
-                    <label>색상 (RGB)</label>
-                    <div style="display: flex; gap: 4px;">
-                        <input type="number" id="summonR" min="0" max="255" value="100" style="width: 50px;">
-                        <input type="number" id="summonG" min="0" max="255" value="100" style="width: 50px;">
-                        <input type="number" id="summonB" min="0" max="255" value="255" style="width: 50px;">
-                    </div>
+            </div>
+            
+            <div class="color-picker-container">
+                <label>개체 색상 선택</label>
+                <div class="picker-wrapper">
+                    <input type="color" id="summonColor" value="#6366f1">
+                    <div id="colorPreview"></div>
                 </div>
             </div>
             <div class="modal-actions">

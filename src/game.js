@@ -617,8 +617,16 @@ class Simulation {
         const modal = document.getElementById('summonModal');
         const confirmBtn = document.getElementById('confirmSummon');
         const cancelBtn = document.getElementById('cancelSummon');
+        const colorInput = document.getElementById('summonColor');
+        const colorPreview = document.getElementById('colorPreview');
 
         if (!modal || !confirmBtn || !cancelBtn) return;
+
+        if (colorInput && colorPreview) {
+            const updatePreview = () => colorPreview.style.backgroundColor = colorInput.value;
+            colorInput.oninput = updatePreview;
+            updatePreview();
+        }
 
         confirmBtn.onclick = () => {
             const name = document.getElementById('summonName').value;
@@ -633,9 +641,11 @@ class Simulation {
             const hp = parseFloat(document.getElementById('summonHp').value);
             const hunger = parseFloat(document.getElementById('summonHunger').value);
             const gender = document.getElementById('summonGender').value;
-            const r = parseInt(document.getElementById('summonR').value);
-            const g = parseInt(document.getElementById('summonG').value);
-            const b = parseInt(document.getElementById('summonB').value);
+            
+            const hex = colorInput.value;
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
 
             const wp = this.camera.toWorld(this.canvas.width / 2, this.canvas.height / 2);
             
